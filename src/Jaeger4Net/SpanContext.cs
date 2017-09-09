@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Jaeger4Net.Jaeger
+namespace Jaeger4Net
 {
     public class SpanContext : ISpanContext
     {
@@ -91,27 +91,45 @@ namespace Jaeger4Net.Jaeger
             => new SpanContext(0, 0, 0, 0, Empty, debugId);
 
         /// <summary>
+        /// Check <see cref="TryParse(string, out SpanContext)"/> for how this works, it just throws
+        /// if the parse was unsuccessful
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static SpanContext Parse(string value)
+        {
+            if(!TryParse(value, out var context))
+            {
+                throw new InvalidOperationException($"Could not parse the value {value} to a span context");
+            }
+            return context;
+        }
+
+        /// <summary>
         /// Converts a string to a span context.
         /// The string should be 4 parts separated by a colon (:)
         /// e.g. 1:2:3:4
         /// the parts[0:2] are parsed as long and form the traceid, parentid,spanid
         /// part[3] is parsed as byte and passed to flags
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static SpanContext Parse(string value)
+        /// <param name="value">The string to parse</param>
+        /// <param name="context">Non-null context if the parse was successful otherwise false</param>
+        /// <returns>true if the span context was parsed</returns>
+        public static bool TryParse(string value, out SpanContext context)
         {
+            context = null;
             if (string.IsNullOrWhiteSpace(value))
-                throw new FormatException("Could not parse null or empty string to span context");
+                return false;
             var parts = value.Split(':');
             if (parts.Length != 4)
-                throw new ArgumentException("parts not 4"); //todo: fix
-            return new SpanContext(
+                return false;
+            context = new SpanContext(
                 long.Parse(parts[0]),
                 long.Parse(parts[1]),
                 long.Parse(parts[2]),
                 byte.Parse(parts[3])
                 );
+            return true;
         }
     }
 }

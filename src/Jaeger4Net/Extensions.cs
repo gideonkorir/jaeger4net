@@ -18,5 +18,8 @@ namespace Jaeger4Net
             foreach (var kvp in keyValuePairs)
                 dictionary.Add(kvp.Key, kvp.Value);
         }
+
+        public static string WithPrefix(this string text, string prefix) => prefix != null ? prefix + text : text;
+        public static string MinusPrefix(this string text, string prefix) => prefix == null ? text : text.Substring(prefix.Length);
     }
 }

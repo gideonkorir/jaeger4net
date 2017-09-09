@@ -5,7 +5,7 @@ using System.Text;
 using OpenTracing.Propagation;
 using Jaeger4Net.Jaeger.Utils;
 
-namespace Jaeger4Net.Jaeger
+namespace Jaeger4Net
 {
     public class Tracer : ITracer
     {

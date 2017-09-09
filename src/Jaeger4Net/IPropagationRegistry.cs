@@ -3,20 +3,38 @@ using System.Collections.Generic;
 using System.Text;
 using OpenTracing;
 using OpenTracing.Propagation;
+using Jaeger4Net.Propagation;
 
 namespace Jaeger4Net
 {
     public interface IPropagationRegistry
     {
-        ITextMap Get<T>(Format<T> format);
+        IInjector<T> GetInjector<T>(Format<T> format);
+
+        IExtractor<T> GetExtractor<T>(Format<T> format);
     }
 
     public class PropagationRegistry : IPropagationRegistry
     {
-        Dictionary<Type, ITextMap> propagators = new Dictionary<Type, ITextMap>();
+        Dictionary<Type, object> injectors = new Dictionary<Type, object>();
+        Dictionary<Type, object> extractors = new Dictionary<Type, object>();
 
-        public void Register<T>(Format<T> format, ITextMap textMap) => propagators[format.GetType()] = textMap;
+        public void Register<T>(IInjector<T> injector)
+        {
+            if (injector == null)
+                throw new ArgumentNullException(nameof(injector));
+            injectors.Add(typeof(T), injector);
+        }
 
-        public ITextMap Get<T>(Format<T> format) => propagators[format.GetType()];
+        public void Register<T>(IExtractor<T> extractor)
+        {
+            if (extractor == null)
+                throw new ArgumentNullException(nameof(extractor));
+            extractors.Add(typeof(T), extractor);
+        }
+
+        public IExtractor<T> GetExtractor<T>(Format<T> format) => extractors[typeof(T)] as IExtractor<T>;
+
+        public IInjector<T> GetInjector<T>(Format<T> format) => injectors[typeof(T)] as IInjector<T>;
     }
 }

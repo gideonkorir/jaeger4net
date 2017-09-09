@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using OTags = OpenTracing.Tags;
 
-namespace Jaeger4Net.Jaeger
+namespace Jaeger4Net
 {
     public class Span : ISpan
     {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jaeger4Net.Jaeger
+namespace Jaeger4Net
 {
     class SpanBuilder : ISpanBuilder
     {
