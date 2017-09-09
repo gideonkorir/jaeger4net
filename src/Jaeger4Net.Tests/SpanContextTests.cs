@@ -31,5 +31,13 @@ namespace Jaeger4Net.Tests
         {
             Assert.False(SpanContext.TryParse(value, out var _));
         }
+
+        [Fact]
+        public void SpanContext_AsString_Builds_A_Valid_String()
+        {
+            var context = new SpanContext(90, 8, 14, 98);
+            Assert.Equal("90:8:14:98", context.ContextAsString);
+            Assert.Equal("90:8:14:98", context.ToString());
+        }
     }
 }
