@@ -203,5 +203,17 @@ namespace Jaeger4Net.Jaeger
 
         public override string ToString() =>
             $"{context.ContextAsString} - {operationName}";
+
+
+
+        readonly static AsyncLocal<Span> current = new AsyncLocal<Span>();
+
+        public static Span Current
+        {
+            get => current.Value;
+            //only settable by the library.
+            //similar to ActiveSpanSource in java
+            internal set => current.Value = value;
+        }
     }
 }
