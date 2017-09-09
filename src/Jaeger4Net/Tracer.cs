@@ -12,9 +12,10 @@ namespace Jaeger4Net.Jaeger
         public string ServiceName { get; }
 
         public IClock Clock { get; }
+
         public ISpanBuilder BuildSpan(string operationName)
         {
-            throw new NotImplementedException();
+            return new SpanBuilder(this, operationName);
         }
 
         public ISpanContext Extract<TCarrier>(Format<TCarrier> format, TCarrier carrier)
