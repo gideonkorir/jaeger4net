@@ -100,7 +100,7 @@ namespace Jaeger4Net
         {
             if(!TryParse(value, out var context))
             {
-                throw new InvalidOperationException($"Could not parse the value {value} to a span context");
+                throw new FormatException($"Could not parse the value {value} to a span context");
             }
             return context;
         }
@@ -123,11 +123,16 @@ namespace Jaeger4Net
             var parts = value.Split(':');
             if (parts.Length != 4)
                 return false;
+            if (!long.TryParse(parts[0], out var traceId))
+                return false;
+            if (!long.TryParse(parts[1], out var spanId))
+                return false;
+            if (!long.TryParse(parts[2], out var parentId))
+                return false;
+            if (!byte.TryParse(parts[3], out var flags))
+                return false;
             context = new SpanContext(
-                long.Parse(parts[0]),
-                long.Parse(parts[1]),
-                long.Parse(parts[2]),
-                byte.Parse(parts[3])
+                traceId, spanId, parentId, flags
                 );
             return true;
         }
