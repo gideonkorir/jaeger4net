@@ -52,7 +52,7 @@ namespace Jaeger4Net.Propagation
             {
                 if(item.Key.Equals(contextKey))
                 {
-                    SpanContext.TryParse(Decode(item.Value), out context);
+                    contextParsed = SpanContext.TryParse(Decode(item.Value), out context);
                 }
                 else if(item.Key.Equals(Constants.DEBUG_ID_HEADER_KEY))
                 {
@@ -62,7 +62,7 @@ namespace Jaeger4Net.Propagation
                 {
                     if (baggage == null)
                         baggage = new Dictionary<string, string>();
-                    baggage.Add(item.Key.MinusPrefix(baggagePrefix), item.Value);
+                    baggage.Add(item.Key.MinusPrefix(baggagePrefix), Decode(item.Value));
                 }
             }
 
