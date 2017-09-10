@@ -37,6 +37,6 @@ namespace Jaeger4Net.Baggage
         }
 
         protected virtual Uri GetEndPoint(string serviceName)
-            => new Uri($"http://{host.Host}:{host.Port}//baggageRestrictions?service={serviceName}");
+            => new Uri($"http://{host.Host}:{host.Port}/baggageRestrictions?service={WebUtility.UrlEncode(serviceName)}");
     }
 }
