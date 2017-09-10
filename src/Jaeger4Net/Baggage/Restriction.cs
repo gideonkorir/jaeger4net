@@ -37,5 +37,9 @@ namespace Jaeger4Net.Baggage
         {
             return MaxValueLength.GetHashCode() + KeyAllowed.GetHashCode();
         }
+
+        public static bool operator ==(Restriction left, Restriction right) => left.Equals(right);
+
+        public static bool operator !=(Restriction left, Restriction right) => !left.Equals(right);
     }
 }

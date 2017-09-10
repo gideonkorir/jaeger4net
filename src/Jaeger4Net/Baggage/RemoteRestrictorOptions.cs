@@ -8,7 +8,7 @@ namespace Jaeger4Net.Baggage
     public class RemoteRestrictorOptions
     {
         public TimeSpan RefreshInterval { get; set; } = TimeSpan.FromMinutes(1);
-        public string ServiceName { get; set; }
+        public string[] Services { get; set; }
         public bool DenyBaggageOnInitializationFailure { get; set; }
         public CancellationToken CancellationToken { get; set; }
     }

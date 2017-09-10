@@ -14,14 +14,15 @@ namespace Jaeger4Net.Baggage
         readonly RemoteRestrictorOptions options;
         int initialized;
 
-        readonly ConcurrentDictionary<string, Restriction> serviceRestrictions;
+        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Restriction>> serviceRestrictions;
 
         public RemoteBaggageRestrictor(IRestrictionSource restrictionSource, RemoteRestrictorOptions options)
         {
             this.restrictionSource = restrictionSource ?? throw new ArgumentNullException(nameof(restrictionSource));
             this.options = options ?? throw new ArgumentNullException(nameof(options));
-            serviceRestrictions = new ConcurrentDictionary<string, Restriction>();
+            serviceRestrictions = new ConcurrentDictionary<string, ConcurrentDictionary<string, Restriction>>();
             timer = new AsyncTimer(UpdateAsync, options.RefreshInterval, options.CancellationToken);
+            timer.Start();
         }
 
         public Restriction Get(string service, string key)
@@ -32,23 +33,40 @@ namespace Jaeger4Net.Baggage
                     ? Restriction.Invalid
                     : Restriction.Valid;
             }
-            if (serviceRestrictions.TryGetValue(key, out var value))
-                return value;
+            if (serviceRestrictions.TryGetValue(service, out var restrictions))
+                if (restrictions.TryGetValue(key, out var value))
+                    return value;
             return Restriction.Invalid;
         }
 
-        public async Task UpdateAsync()
+        async Task UpdateAsync()
+        {
+            if (options.Services.Length == 1)
+            {
+                await UpdateAsync(options.Services[0]).ConfigureAwait(false);
+                return;
+            }
+            var tasks = new Task[options.Services.Length];
+            for(int i=0; i<options.Services.Length; i++)
+            {
+                tasks[i] = UpdateAsync(options.Services[i]);
+            }
+            await Task.WhenAll(tasks);
+        }
+
+        async Task UpdateAsync(string serviceName)
         {
             try
             {
-                var restrictions = await restrictionSource.FetchAsync(options.ServiceName, options.CancellationToken)
+                var restrictions = await restrictionSource.FetchAsync(serviceName, options.CancellationToken)
                     .ConfigureAwait(false);
+                var scopedRestrictions = serviceRestrictions.GetOrAdd(serviceName, (key) => new ConcurrentDictionary<string, Restriction>());
                 if(restrictions != null)
                 {
                     foreach(var restr in restrictions)
                     {
                         var value = new Restriction(true, restr.MaxValueLength);
-                        serviceRestrictions.AddOrUpdate(restr.Key, value,
+                        scopedRestrictions.AddOrUpdate(restr.Key, value,
                             (key, old) => value
                             );
                     }
