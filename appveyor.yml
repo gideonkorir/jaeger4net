@@ -15,7 +15,7 @@ before_build:
   - cmd: dotnet restore src/Jaeger4Net.sln
 build_script:
   # output will be in ./src/bin/debug/netcoreapp1.1/publish
-  - cmd: dotnet publish src/Jaeger4Net.sln
+  - cmd: dotnet build src/Jaeger4Net.sln
 after_build:
   # For once the build has completed
 artifacts:
