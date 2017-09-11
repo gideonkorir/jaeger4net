@@ -11,7 +11,6 @@ namespace Jaeger4Net.Reporters
         }
 
         public int Report(Span span)
-        {
-        }
+            => 0;
     }
 }
