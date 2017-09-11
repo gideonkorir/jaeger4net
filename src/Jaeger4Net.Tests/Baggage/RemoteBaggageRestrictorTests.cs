@@ -1,4 +1,5 @@
 ﻿using Jaeger4Net.Baggage;
+using Jaeger4Net.Metrics;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace Jaeger4Net.Tests.Baggage
             var restrictor = new RemoteBaggageRestrictor(mock.Object, new RemoteRestrictorOptions()
             {
                 DenyBaggageOnInitializationFailure = true
-            });
+            }, ClientMetrics.Null);
             await Task.Delay(1000); //give time for initialization
             var restriction = restrictor.Get("service", "key");
             Assert.Equal(Restriction.Invalid, restriction);
@@ -37,7 +38,7 @@ namespace Jaeger4Net.Tests.Baggage
             var restrictor = new RemoteBaggageRestrictor(mock.Object, new RemoteRestrictorOptions()
             {
                 DenyBaggageOnInitializationFailure = false
-            });
+            }, ClientMetrics.Null);
             await Task.Delay(1000); //give time for initialization
             var restriction = restrictor.Get("service", "key");
             Assert.Equal(Restriction.Valid, restriction);
@@ -62,7 +63,7 @@ namespace Jaeger4Net.Tests.Baggage
             {
                 Services = new[] { "service" },
                 DenyBaggageOnInitializationFailure = true
-            });
+            }, ClientMetrics.Null);
             await Task.Delay(1000); //give time for initialization
             var restriction = restrictor.Get("service", "key");
 

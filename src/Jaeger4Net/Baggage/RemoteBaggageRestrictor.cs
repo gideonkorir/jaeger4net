@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jaeger4Net.Metrics;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -12,14 +13,16 @@ namespace Jaeger4Net.Baggage
         readonly IRestrictionSource restrictionSource;
         readonly AsyncTimer timer;
         readonly RemoteRestrictorOptions options;
+        readonly ClientMetrics metrics;
         int initialized;
 
         readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Restriction>> serviceRestrictions;
 
-        public RemoteBaggageRestrictor(IRestrictionSource restrictionSource, RemoteRestrictorOptions options)
+        public RemoteBaggageRestrictor(IRestrictionSource restrictionSource, RemoteRestrictorOptions options,ClientMetrics metrics)
         {
             this.restrictionSource = restrictionSource ?? throw new ArgumentNullException(nameof(restrictionSource));
             this.options = options ?? throw new ArgumentNullException(nameof(options));
+            this.metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
             serviceRestrictions = new ConcurrentDictionary<string, ConcurrentDictionary<string, Restriction>>();
             timer = new AsyncTimer(UpdateAsync, options.RefreshInterval, options.CancellationToken);
             timer.Start();
@@ -72,10 +75,12 @@ namespace Jaeger4Net.Baggage
                     }
                 }
                 Interlocked.Exchange(ref initialized, 1); //just set initialized to 1
+                metrics.BaggageRestrictionsUpdateSuccess(delta: 1);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 //we don't know what to do
+                metrics.BaggageRestrictionsUpdateFailure(delta: 1);
             }
         }
     }

@@ -6,7 +6,7 @@ namespace Jaeger4Net.Metrics
 {
     public class ReporterStatsFactory : IStatsFactory
     {
-        IStatsReporter reporter;
+        readonly IStatsReporter reporter;
 
         public ReporterStatsFactory(IStatsReporter reporter)
         {
