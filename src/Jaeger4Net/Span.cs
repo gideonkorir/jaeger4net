@@ -24,7 +24,7 @@ namespace Jaeger4Net
 
         public DateTimeOffset Start { get; }
 
-        public DateTimeOffset? End { get; }
+        public DateTimeOffset? End { get; private set; }
 
         public long Duration => End.Value.Ticks - Start.Ticks;
         public Tracer Tracer => tracer;
@@ -94,6 +94,7 @@ namespace Jaeger4Net
             lock(this)
             {
                 finishCalled = true;
+                End = finishTimestamp;
             }
             if(context.IsSampled)
                 tracer.Report(this);

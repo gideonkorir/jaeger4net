@@ -7,5 +7,7 @@ namespace Jaeger4Net.Jaeger.Utils
     public interface IClock
     {
         DateTimeOffset Now();
+
+        TimeSpan GetEllapsed();
     }
 }
