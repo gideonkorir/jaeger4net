@@ -6,6 +6,6 @@ namespace Jaeger4Net.Utils
 {
     static class NewId
     {
-        public static long Next() => throw new NotImplementedException("Haven't figured this out yet");
+        public static Func<long> Next { get; set; } = new ThreadLocalRandom().Next;
     }
 }

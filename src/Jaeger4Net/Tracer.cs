@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using OpenTracing.Propagation;
-using Jaeger4Net.Jaeger.Utils;
+using Jaeger4Net.Utils;
 
 namespace Jaeger4Net
 {
