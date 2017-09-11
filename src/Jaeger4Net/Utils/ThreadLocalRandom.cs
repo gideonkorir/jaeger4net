@@ -5,6 +5,10 @@ using System.Threading;
 
 namespace Jaeger4Net.Utils
 {
+    /// <summary>
+    /// More info at 
+    /// https://stackoverflow.com/questions/19270507/correct-way-to-use-random-in-multithread-application
+    /// </summary>
     public class ThreadLocalRandom
     {
         static int ticks = Environment.TickCount;
