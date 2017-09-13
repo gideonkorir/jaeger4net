@@ -13,12 +13,10 @@ namespace Jaeger4Net.Reporters
             this.reporters = new List<IReporter>(reporters);
         }
 
-        public int Report(Span span)
+        public void Report(Span span)
         {
-            var rem = 0;
             foreach (var r in reporters)
-                rem = r.Report(span);
-            return rem;
+                r.Report(span);
         }
 
         public void Dispose()

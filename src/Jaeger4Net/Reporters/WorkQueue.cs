@@ -31,14 +31,12 @@ namespace Jaeger4Net.Reporters
             queue = new BlockingCollection<Span>(options.MaxQueueSize);
         }
 
-        public int Add(Span span)
+        public void Add(Span span)
         {
             if(!queue.TryAdd(span))
             {
                 metrics.ReporterDropped(delta: 1);
-                return 0;
             }
-            return 1;
         }
 
         public void StartAsync(CancellationToken cancellation)

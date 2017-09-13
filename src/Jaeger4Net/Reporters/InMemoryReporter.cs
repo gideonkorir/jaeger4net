@@ -15,14 +15,10 @@ namespace Jaeger4Net.Reporters
             spans = new List<Span>();
         }
 
-        public int Report(Span span)
+        public void Report(Span span)
         {
-            lock (spans)
-            {
+            lock(spans)
                 spans.Add(span);
-                return spans.Count;
-            }
-
         }
         public void Dispose()
         {

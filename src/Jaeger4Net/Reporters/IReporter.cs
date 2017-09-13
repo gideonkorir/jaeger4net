@@ -12,6 +12,6 @@ namespace Jaeger4Net.Reporters
     /// </summary>
     public interface IReporter : IDisposable
     {
-        int Report(Span span);
+        void Report(Span span);
     }
 }

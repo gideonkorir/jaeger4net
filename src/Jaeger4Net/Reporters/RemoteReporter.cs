@@ -23,7 +23,7 @@ namespace Jaeger4Net.Reporters
         public void Start(CancellationToken cancellation)
             => workQueue.StartAsync(cancellation);
 
-        public int Report(Span span)
+        public void Report(Span span)
             => workQueue.Add(span);
 
         public void Dispose()

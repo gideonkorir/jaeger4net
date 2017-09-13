@@ -10,7 +10,9 @@ namespace Jaeger4Net.Reporters
         {
         }
 
-        public int Report(Span span)
-            => 0;
+        public void Report(Span span)
+        {
+
+        }
     }
 }
