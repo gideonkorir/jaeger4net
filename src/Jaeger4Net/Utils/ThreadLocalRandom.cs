@@ -20,16 +20,11 @@ namespace Jaeger4Net.Utils
         static readonly ThreadLocal<Random> random =
             new ThreadLocal<Random>(() => new Random(Interlocked.Increment(ref ticks)));
 
-        /// <summary>
-        /// Bytes which are filled in by the local random.
-        /// </summary>
-        static readonly ThreadLocal<byte[]> bytes =
-            new ThreadLocal<byte[]>(() => new byte[8]);
-
         public long Next()
-        {            
-            random.Value.NextBytes(bytes.Value);
-            return BitConverter.ToInt64(bytes.Value, 0);
+        {
+            var bytes = new byte[8];
+            random.Value.NextBytes(bytes);
+            return BitConverter.ToInt64(bytes, 0);
         }
     }
 }
