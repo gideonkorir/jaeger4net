@@ -12,6 +12,8 @@ namespace Jaeger4Net.Sampling
         private readonly long negativeSamplingBoundary, positiveSamplingBoundary;
         readonly IReadOnlyDictionary<string, object> tags = null;
 
+        public double SamplingRate => samplingRate;
+
         public ProbabilisticSampler(double samplingRate)
         {
             if (samplingRate < 0.0 || samplingRate > 1.0)

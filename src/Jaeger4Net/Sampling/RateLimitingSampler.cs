@@ -11,6 +11,8 @@ namespace Jaeger4Net.Sampling
         readonly RateLimiter rateLimiter;
         readonly IReadOnlyDictionary<string, object> tags;
 
+        public double MaxTracesPerSecond => maxTracesPerSecond;
+
         public RateLimitingSampler(double maxTracesPerSecond, IClock clock)
         {
             this.maxTracesPerSecond = maxTracesPerSecond;
