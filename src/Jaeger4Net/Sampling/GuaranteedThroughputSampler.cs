@@ -19,53 +19,6 @@ namespace Jaeger4Net.Sampling
         readonly Dictionary<string, object> tags;
         readonly IClock clock;
 
-        /// <summary>
-        /// The sampling rate for the probabilistic sampler
-        /// </summary>
-        public double SamplingRate
-        {
-            get => probabilisticSampler.SamplingRate;
-            set
-            {
-                //update the sampling rate
-                if (value != probabilisticSampler.SamplingRate)
-                {
-                    var probSampler = new ProbabilisticSampler(value);
-                    ProbabilisticSampler copy, replaced;
-                    do
-                    {
-                        copy = probabilisticSampler;
-                        replaced = Interlocked.CompareExchange(ref probabilisticSampler, probSampler, copy);
-                    }
-                    while (copy != replaced);
-                }
-                lock (tags)
-                    tags[Constants.SAMPLER_PARAM_TAG_KEY] = value;
-            }
-        }
-
-        /// <summary>
-        /// The lower bound for the rate limiting sampler
-        /// </summary>
-        public double LowerBound
-        {
-            get => rateLimitingSampler.MaxTracesPerSecond;
-            set
-            {
-                if (value != rateLimitingSampler.MaxTracesPerSecond)
-                {
-                    var rateSampler = new RateLimitingSampler(value, clock);
-                    RateLimitingSampler copy, replaced;
-                    do
-                    {
-                        copy = rateLimitingSampler;
-                        replaced = Interlocked.CompareExchange(ref rateLimitingSampler, rateSampler, copy);
-                    }
-                    while (copy != replaced);
-                }
-            }
-        }
-
         public GuaranteedThroughputSampler(double samplingRate, double lowerBound, IClock clock)
         {
             probabilisticSampler = new ProbabilisticSampler(samplingRate);
@@ -102,6 +55,40 @@ namespace Jaeger4Net.Sampling
             var rateSample = rateSampler.Sample(operation, traceId);
             return new SamplingStatus(rateSample, tags);
         }
+
+        /// <summary>
+        /// Updates either the samplingRate, lowerBound or both.
+        /// Returns true if either of them has changed.
+        /// NB: Upates tags if the sampling rate is different
+        /// </summary>
+        /// <param name="samplingRate">The probabilistic sampling rate</param>
+        /// <param name="lowerBound">Rate limiting lower bound</param>
+        /// <returns></returns>
+        public bool Update(double samplingRate, double lowerBound)
+        {
+            bool updated = false;
+            if(samplingRate != probabilisticSampler.SamplingRate)
+            {
+                var pSampler = new ProbabilisticSampler(samplingRate);
+                lock(tags)
+                {
+                    probabilisticSampler = pSampler;
+                    tags[Constants.SAMPLER_PARAM_TAG_KEY] = samplingRate;
+                }
+                updated = true;
+            }
+            if(lowerBound != rateLimitingSampler.MaxTracesPerSecond)
+            {
+                var rSampler = new RateLimitingSampler(lowerBound, clock);
+                lock(tags)
+                {
+                    rateLimitingSampler = rSampler;
+                }
+                updated = true;
+            }
+            return updated;
+        }
+         
 
         public bool Equals(ISampler other)
         {
