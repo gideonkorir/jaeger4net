@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace Jaeger4Net.Baggage
+namespace Jaeger4Net
 {
     public struct HostPort
     {
