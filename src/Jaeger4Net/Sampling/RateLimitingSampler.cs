@@ -47,6 +47,7 @@ namespace Jaeger4Net.Sampling
 
         public void Dispose()
         {
+            //nothing to dispose
         }
     }
 }

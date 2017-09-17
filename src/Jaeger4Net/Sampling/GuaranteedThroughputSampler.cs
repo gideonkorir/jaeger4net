@@ -14,6 +14,8 @@ namespace Jaeger4Net.Sampling
     /// </summary>
     public class GuaranteedThroughputSampler : ISampler
     {
+        readonly object objLock = new object();
+
         ProbabilisticSampler probabilisticSampler;
         RateLimitingSampler rateLimitingSampler;
         readonly Dictionary<string, object> tags;
@@ -45,8 +47,13 @@ namespace Jaeger4Net.Sampling
         /// <returns></returns>
         public SamplingStatus Sample(string operation, long traceId)
         {
-            var probSampler = probabilisticSampler;
-            var rateSampler = rateLimitingSampler; //clr guarantees thread safety
+            ProbabilisticSampler probSampler = null;
+            RateLimitingSampler rateSampler = null;
+            lock (objLock)
+            {
+                probSampler = probabilisticSampler;
+                rateSampler = rateLimitingSampler;
+            }
 
             var probabilitySample = probSampler.Sample(operation, traceId);
             if (probabilitySample)
@@ -70,7 +77,7 @@ namespace Jaeger4Net.Sampling
             if(samplingRate != probabilisticSampler.SamplingRate)
             {
                 var pSampler = new ProbabilisticSampler(samplingRate);
-                lock(tags)
+                lock(objLock)
                 {
                     probabilisticSampler = pSampler;
                     tags[Constants.SAMPLER_PARAM_TAG_KEY] = samplingRate;
@@ -80,7 +87,7 @@ namespace Jaeger4Net.Sampling
             if(lowerBound != rateLimitingSampler.MaxTracesPerSecond)
             {
                 var rSampler = new RateLimitingSampler(lowerBound, clock);
-                lock(tags)
+                lock(objLock)
                 {
                     rateLimitingSampler = rSampler;
                 }
@@ -108,8 +115,11 @@ namespace Jaeger4Net.Sampling
 
         public void Dispose()
         {
-            probabilisticSampler.Dispose();
-            rateLimitingSampler.Dispose();
+            lock (objLock)
+            {
+                probabilisticSampler.Dispose();
+                rateLimitingSampler.Dispose();
+            }
         }
     }
 }
