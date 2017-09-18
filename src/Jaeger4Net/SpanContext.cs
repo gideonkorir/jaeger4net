@@ -53,12 +53,19 @@ namespace Jaeger4Net
 
         public SpanContext AppendBaggageItem(string key, string value)
         {
-            var bag = new Dictionary<string, string>(Baggage.Count + 1)
+            Dictionary<string, string> bag = null;
+            if(Baggage.ContainsKey(key))
             {
-                {  key, value }
-            };
-            foreach (var item in Baggage)
-                bag.Add(item.Key, item.Value);
+                bag = new Dictionary<string, string>(Baggage.Count);
+                bag.AddRange(Baggage);
+                bag[key] = value;
+            }
+            else
+            {
+                bag = new Dictionary<string, string>(Baggage.Count + 1);
+                bag.AddRange(Baggage);
+                bag.Add(key, value);
+            }
 
 
             return new SpanContext(TraceId,

@@ -244,6 +244,14 @@ namespace Jaeger4Net
         /// Checks to see we are a server span i.e. we are handling a client request.
         /// Returns true if tags["span.kind"] == "server"
         /// </summary>
-        internal bool IsRpcServer => Tags.SpanKindServer.Equals(tags[Tags.SpanKind]);
+        internal bool IsRpcServer
+        {
+            get
+            {
+                if (tags.TryGetValue(Tags.SpanKind, out var kindObj) && kindObj is string kind)
+                    return Tags.SpanKindServer.Equals(kind);
+                return false;
+            }
+        }
     }
 }

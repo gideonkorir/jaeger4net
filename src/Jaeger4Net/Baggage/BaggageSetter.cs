@@ -34,7 +34,8 @@ namespace Jaeger4Net.Baggage
                 truncated = true;
                 metrics.BaggageTruncate(delta: 1);
             }
-            prevItem = span.GetBaggageItem(key);
+            if (!span.TryGetBaggageItem(key, out prevItem))
+                prevItem = null;
             LogFields(span, key, value, prevItem, truncated, restriction.KeyAllowed);
             metrics.BaggageUpdateSuccess(delta: 1);
             return (span.Context as SpanContext).AppendBaggageItem(key, value);
@@ -53,15 +54,15 @@ namespace Jaeger4Net.Baggage
             };
             if(!string.IsNullOrEmpty(prevItem))
             {
-                map.Add("override", "true");
+                map.Add("override", true);
             }
             if(truncated)
             {
-                map.Add("truncated", "true");
+                map.Add("truncated", true);
             }
             if(!valid)
             {
-                map.Add("invalid", "true");
+                map.Add("invalid", true);
             }
             span.Log(map);
         }

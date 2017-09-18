@@ -106,6 +106,12 @@ namespace Jaeger4Net
                 return context.Baggage[key];
         }
 
+        public bool TryGetBaggageItem(string key, out string value)
+        {
+            lock (this)
+                return context.Baggage.TryGetValue(key, out value);
+        }
+
         
 
         /// <summary>

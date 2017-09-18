@@ -20,28 +20,28 @@ namespace Jaeger4Net.Metrics
 
         public ClientMetrics(IStatsFactory factory)
         {
-            TraceStartedSampled = factory.Counter("traces", Tag.Of("state", "started"), Tag.Of("sampled", "y"));
-            TraceStartedNotSampled = factory.Counter("traces", Tag.Of("state", "started"), Tag.Of("sampled", "n"));
-            TracesJoinedSampled = factory.Counter("traces", Tag.Of("state", "joined"), Tag.Of("sampled", "y"));
-            TracesJoinedNotSampled = factory.Counter("traces", Tag.Of("state", "joined"), Tag.Of("sampled", "n"));
-            SpansStarted = factory.Counter("spans", Tag.Of("state", "started"), Tag.Of("group", "lifecycle"));
-            SpansFinished = factory.Counter("spans", Tag.Of("state", "finished"), Tag.Of("group", "lifecycle"));
-            SpansSampled = factory.Counter("spans", Tag.Of("group", "sampling"), Tag.Of("sampled", "y"));
-            SpansNotSampled = factory.Counter("spans", Tag.Of("group", "sampling"), Tag.Of("sampled", "n"));
-            DecodingErrors = factory.Counter("decoding-errors");
-            ReporterSuccess = factory.Counter("reporter-spans", Tag.Of("state", "success"));
-            ReporterFailure = factory.Counter("reporter-spans", Tag.Of("state", "failure"));
-            ReporterDropped = factory.Counter("spans", Tag.Of("state", "dropped"));
-            ReporterQueueLength = factory.Gauge("reporter-queue");
-            SamplerRetrieved = factory.Counter("sampler", Tag.Of("state", "retrieved"));
-            SamplerUpdated = factory.Counter("sampler", Tag.Of("state", "updated"));
-            SamplerQueryFailure = factory.Counter("sampler", Tag.Of("state", "failure"), Tag.Of("phase", "query"));
-            SamplerParsingFailure = factory.Counter("sampler", Tag.Of("state", "failure"), Tag.Of("phase", "parsing"));
-            BaggageUpdateSuccess = factory.Counter("baggage-update", Tag.Of("result", "ok"));
-            BaggageUpdateFailure = factory.Counter("baggage-update", Tag.Of("result", "err"));
-            BaggageTruncate = factory.Counter("baggage-truncate");
-            BaggageRestrictionsUpdateSuccess = factory.Counter("baggage-restrictions-update", Tag.Of("result", "ok"));
-            BaggageRestrictionsUpdateFailure = factory.Counter("baggage-restrictions-update", Tag.Of("result", "err"));
+            TraceStartedSampled = factory.Counter("jaeger.traces", Tag.Of("state", "started"), Tag.Of("sampled", "y"));
+            TraceStartedNotSampled = factory.Counter("jaeger.traces", Tag.Of("state", "started"), Tag.Of("sampled", "n"));
+            TracesJoinedSampled = factory.Counter("jaeger.traces", Tag.Of("state", "joined"), Tag.Of("sampled", "y"));
+            TracesJoinedNotSampled = factory.Counter("jaeger.traces", Tag.Of("state", "joined"), Tag.Of("sampled", "n"));
+            SpansStarted = factory.Counter("jaeger.spans", Tag.Of("state", "started"), Tag.Of("group", "lifecycle"));
+            SpansFinished = factory.Counter("jaeger.spans", Tag.Of("state", "finished"), Tag.Of("group", "lifecycle"));
+            SpansSampled = factory.Counter("jaeger.spans", Tag.Of("group", "sampling"), Tag.Of("sampled", "y"));
+            SpansNotSampled = factory.Counter("jaeger.spans", Tag.Of("group", "sampling"), Tag.Of("sampled", "n"));
+            DecodingErrors = factory.Counter("jaeger.decoding-errors");
+            ReporterSuccess = factory.Counter("jaeger.reporter-spans", Tag.Of("state", "success"));
+            ReporterFailure = factory.Counter("jaeger.reporter-spans", Tag.Of("state", "failure"));
+            ReporterDropped = factory.Counter("jaeger.spans", Tag.Of("state", "dropped"));
+            ReporterQueueLength = factory.Gauge("jaeger.reporter-queue");
+            SamplerRetrieved = factory.Counter("jaeger.sampler", Tag.Of("state", "retrieved"));
+            SamplerUpdated = factory.Counter("jaeger.sampler", Tag.Of("state", "updated"));
+            SamplerQueryFailure = factory.Counter("jaeger.sampler", Tag.Of("state", "failure"), Tag.Of("phase", "query"));
+            SamplerParsingFailure = factory.Counter("jaeger.sampler", Tag.Of("state", "failure"), Tag.Of("phase", "parsing"));
+            BaggageUpdateSuccess = factory.Counter("jaeger.baggage-update", Tag.Of("result", "ok"));
+            BaggageUpdateFailure = factory.Counter("jaeger.baggage-update", Tag.Of("result", "err"));
+            BaggageTruncate = factory.Counter("jaeger.baggage-truncate");
+            BaggageRestrictionsUpdateSuccess = factory.Counter("jaeger.baggage-restrictions-update", Tag.Of("result", "ok"));
+            BaggageRestrictionsUpdateFailure = factory.Counter("jaeger.baggage-restrictions-update", Tag.Of("result", "err"));
         }
 
         /// <summary>

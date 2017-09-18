@@ -13,9 +13,10 @@ namespace Jaeger4Net.Metrics
 
             var builder = new StringBuilder(userSuppliedName);
             //order the keys then concat them using .key=value
-            var set = new SortedSet<Tag>(tags);
-            foreach(var item in set)
+            Array.Sort(tags, TagComparer.Instance);
+            for(int i=0; i<tags.Length; i++)
             {
+                var item = tags[i];
                 builder.Append('.');
                 builder.Append(item.Key);
                 builder.Append('=');
