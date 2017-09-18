@@ -64,7 +64,7 @@ namespace Jaeger4Net.Sampling
                         }
                         else
                         {
-                            log.LogInformation(
+                            log.LogWarning(
                                 "Exceeded the number of operations {operations} for per operation sampling",
                                 maxOperations
                                 );
@@ -84,8 +84,8 @@ namespace Jaeger4Net.Sampling
             int count = 0;
             lock(objLock)
             {
-                found = operationSamplers.TryGetValue(operation, out sampler);  
-                count = operationSamplers.Count //we never remove samplers
+                found = operationSamplers.TryGetValue(operation, out sampler);
+                count = operationSamplers.Count; //we never remove samplers
             }
 
             if (found)
@@ -116,11 +116,17 @@ namespace Jaeger4Net.Sampling
                     return false;
                 return true;
             }
+            return false;
         }
 
         public void Dispose()
         {
-            probabilisticSampler.Dispose();
+            lock(objLock)
+            {
+                probabilisticSampler.Dispose();
+                foreach (var value in operationSamplers.Values)
+                    value.Dispose();
+            }
         }
     }
 }
