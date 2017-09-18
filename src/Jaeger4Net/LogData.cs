@@ -6,22 +6,22 @@ namespace Jaeger4Net
 {
     public class LogData
     {
-        readonly DateTimeOffset instant;
-        readonly string message;
-        readonly object payload;
-        readonly IEnumerable<KeyValuePair<string, object>> fields;
+        public DateTimeOffset Instant { get; }
+        public string Message { get; }
+        public object PayLoad { get; }
+        public IEnumerable<KeyValuePair<string, object>> Fields { get; }
 
         public LogData(DateTimeOffset instant, string message, object payload)
         {
-            this.instant = instant;
-            this.message = message;
-            this.payload = payload;
+            this.Instant = instant;
+            this.Message = message;
+            this.PayLoad = payload;
         }
 
         public LogData(DateTimeOffset instant, IEnumerable<KeyValuePair<string, object>> fields)
         {
-            this.instant = instant;
-            this.fields = fields;
+            this.Instant = instant;
+            this.Fields = fields;
         }
     }
 }

@@ -9,15 +9,15 @@ namespace Jaeger4Net
 {
     public interface IPropagationRegistry
     {
-        IInjector<T> GetInjector<T>(Format<T> format);
+        bool TryGetInjector<T>(Format<T> format, out IInjector<T> injector);
 
-        IExtractor<T> GetExtractor<T>(Format<T> format);
+        bool TryGetExtractor<T>(Format<T> format, out IExtractor<T> extractor);
     }
 
     public class PropagationRegistry : IPropagationRegistry
     {
-        Dictionary<Type, object> injectors = new Dictionary<Type, object>();
-        Dictionary<Type, object> extractors = new Dictionary<Type, object>();
+        readonly Dictionary<Type, object> injectors = new Dictionary<Type, object>();
+        readonly Dictionary<Type, object> extractors = new Dictionary<Type, object>();
 
         public void Register<T>(IInjector<T> injector)
         {
@@ -33,8 +33,26 @@ namespace Jaeger4Net
             extractors.Add(typeof(T), extractor);
         }
 
-        public IExtractor<T> GetExtractor<T>(Format<T> format) => extractors[typeof(T)] as IExtractor<T>;
+        public bool TryGetExtractor<T>(Format<T> format, out IExtractor<T> extractor)
+        {
+            if(extractors.TryGetValue(typeof(T), out var obj) && obj is IExtractor<T> temp)
+            {
+                extractor = temp;
+                return true;
+            }
+            extractor = null;
+            return false;
+        }
 
-        public IInjector<T> GetInjector<T>(Format<T> format) => injectors[typeof(T)] as IInjector<T>;
+        public bool TryGetInjector<T>(Format<T> format, out IInjector<T> injector)
+        {
+            if(injectors.TryGetValue(typeof(T), out var obj) && obj is IInjector<T> temp)
+            {
+                injector = temp;
+                return true;
+            }
+            injector = null;
+            return false;
+        }
     }
 }

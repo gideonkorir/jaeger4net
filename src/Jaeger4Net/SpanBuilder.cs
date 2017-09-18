@@ -8,11 +8,11 @@ namespace Jaeger4Net
 {
     class SpanBuilder : ISpanBuilder
     {
-        List<Reference> references = new List<Reference>(1); //most of the time we only have a single item
-        Dictionary<string, object> tags = new Dictionary<string, object>();
+        readonly List<Reference> references = new List<Reference>(1); //most of the time we only have a single item
+        readonly Dictionary<string, object> tags = new Dictionary<string, object>();
         DateTimeOffset start;
-        string operationName;
-        Tracer tracer;
+        readonly string operationName;
+        readonly Tracer tracer;
 
         public SpanBuilder(Tracer tracer, string operationName)
         {
@@ -150,7 +150,11 @@ namespace Jaeger4Net
             {
                 if(IsSampled)
                 {
-                    throw new NotImplementedException("metrics not ready yet");
+                    tracer.Metrics.TracesJoinedSampled(delta: 1);
+                }
+                else
+                {
+                    tracer.Metrics.TracesJoinedNotSampled(delta: 1);
                 }
             }
 
@@ -198,11 +202,21 @@ namespace Jaeger4Net
             {
                 flags |= SpanContext.SampledFlag | SpanContext.DebugFlag;
                 tags.Add(Constants.DEBUG_ID_HEADER_KEY, debugId);
-                //todo:metrics
+                tracer.Metrics.TraceStartedSampled(delta: 1);
             }
             else
             {
-                //sampling in java let's ignore this for now
+                var samplingStatus = tracer.Sampler.Sample(operationName, id);
+                if(samplingStatus)
+                {
+                    flags |= SpanContext.SampledFlag;
+                    tags.AddRange(samplingStatus.Tags);
+                    tracer.Metrics.TraceStartedSampled(delta: 1);
+                }
+                else
+                {
+                    tracer.Metrics.TraceStartedNotSampled(delta: 1);
+                }
             }
             return new SpanContext(id, id, 0, flags);
         }
