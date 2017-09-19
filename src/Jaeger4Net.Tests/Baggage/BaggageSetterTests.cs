@@ -1,5 +1,6 @@
 ﻿using Jaeger4Net.Baggage;
 using Jaeger4Net.Metrics;
+using Jaeger4Net.Sampling;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace Jaeger4Net.Tests.Baggage
                 (
                 "some-service",
                 new Reporters.InMemoryReporter(),
-                new Sampling.ConstSampler(true),
+                new ConstSampler(true),
                 new PropagationRegistry(),
                 new Jaeger4Net.Utils.CoreClrClock(),
                 metrics,
@@ -95,7 +96,7 @@ namespace Jaeger4Net.Tests.Baggage
                 (
                 "some-service2",
                 new Reporters.InMemoryReporter(),
-                new Sampling.ConstSampler(false),
+                new ConstSampler(false),
                 new PropagationRegistry(),
                 new Jaeger4Net.Utils.CoreClrClock(),
                 metrics,

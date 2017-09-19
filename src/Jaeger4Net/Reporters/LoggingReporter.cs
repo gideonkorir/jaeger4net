@@ -9,9 +9,9 @@ namespace Jaeger4Net.Reporters
     {
         readonly ILogger<LoggingReporter> logger;
 
-        public LoggingReporter(ILogger<LoggingReporter> logger)
+        public LoggingReporter()
         {
-            this.logger = logger;
+            this.logger = Log.Create<LoggingReporter>();
         }
         public void Report(Span span)
         {
