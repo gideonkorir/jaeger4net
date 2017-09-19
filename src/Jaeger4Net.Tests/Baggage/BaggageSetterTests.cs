@@ -1,4 +1,5 @@
 ﻿using Jaeger4Net.Baggage;
+using Jaeger4Net.Metrics;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,13 @@ namespace Jaeger4Net.Tests.Baggage
         readonly BaggageSetter setter;
         readonly Span span;
         readonly Mock<IRestrictBaggage> restrictorMock;
-        readonly Metrics.InMemoryStatsReporter reporter;
+        readonly InMemoryStatsReporter reporter;
         readonly Tracer tracer;
 
         public BaggageSetterTests()
         {
-            reporter = new Metrics.InMemoryStatsReporter();
-            var metrics = new Metrics.ClientMetrics(reporter);
+            reporter = new InMemoryStatsReporter();
+            var metrics = new ClientMetrics(reporter);
             restrictorMock = new Mock<IRestrictBaggage>();
 
             tracer = new Tracer
@@ -88,7 +89,7 @@ namespace Jaeger4Net.Tests.Baggage
         [Fact]
         public void TestUnsampledSpan()
         {
-            var metrics = new Metrics.ClientMetrics(reporter);
+            var metrics = new ClientMetrics(reporter);
             Span.Current = null; //this took me a while to debug
             var _tracer = new Tracer
                 (
