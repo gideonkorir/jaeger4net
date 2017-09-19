@@ -27,7 +27,9 @@ namespace Jaeger4Net.Sampling
                 [Constants.SAMPLER_PARAM_TAG_KEY] = samplingRate
             };
         }
-        public SamplingStatus Sample(string operation, long traceId)
+
+        //virtual for testing
+        public virtual SamplingStatus Sample(string operation, long traceId)
         {
             return traceId > 0
                 ? new SamplingStatus(traceId <= positiveSamplingBoundary, tags)
