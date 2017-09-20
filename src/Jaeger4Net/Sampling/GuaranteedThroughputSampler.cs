@@ -20,12 +20,21 @@ namespace Jaeger4Net.Sampling
         RateLimitingSampler rateLimitingSampler;
         readonly Dictionary<string, object> tags;
         readonly IClock clock;
+        readonly ISamplerObserver observer;
 
         public GuaranteedThroughputSampler(double samplingRate, double lowerBound, IClock clock)
+            : this(samplingRate, lowerBound, clock, null)
+        {
+
+        }
+
+        internal GuaranteedThroughputSampler(double samplingRate, double lowerBound, IClock clock,
+            ISamplerObserver observer)
         {
             probabilisticSampler = new ProbabilisticSampler(samplingRate);
             rateLimitingSampler = new RateLimitingSampler(lowerBound, clock);
             this.clock = clock;
+            this.observer = observer;
             tags = new Dictionary<string, object>()
             {
                 [Constants.SAMPLER_TYPE_TAG_KEY] = "lowerbound",
@@ -57,10 +66,15 @@ namespace Jaeger4Net.Sampling
 
             var probabilitySample = probSampler.Sample(operation, traceId);
             if (probabilitySample)
+            {
+                observer?.OnSampled(probSampler, operation, traceId, probabilitySample); //testing
                 return probabilitySample;
+            }
 
             var rateSample = rateSampler.Sample(operation, traceId);
-            return new SamplingStatus(rateSample, tags);
+            var status = new SamplingStatus(rateSample, tags);
+            observer?.OnSampled(rateSampler, operation, traceId, status); //testing
+            return status;
         }
 
         /// <summary>
@@ -76,12 +90,13 @@ namespace Jaeger4Net.Sampling
             bool updated = false;
             if(samplingRate != probabilisticSampler.SamplingRate)
             {
-                var pSampler = new ProbabilisticSampler(samplingRate);
+                var pSampler = new ProbabilisticSampler(samplingRate, observer);
                 lock(objLock)
                 {
                     probabilisticSampler = pSampler;
                     tags[Constants.SAMPLER_PARAM_TAG_KEY] = samplingRate;
                 }
+                observer?.OnSamplingRateUpdated(pSampler, samplingRate); //testing
                 updated = true;
             }
             if(lowerBound != rateLimitingSampler.MaxTracesPerSecond)
@@ -91,6 +106,7 @@ namespace Jaeger4Net.Sampling
                 {
                     rateLimitingSampler = rSampler;
                 }
+                observer?.OnLowerBoundUpdated(rSampler, lowerBound); //for testing
                 updated = true;
             }
             return updated;

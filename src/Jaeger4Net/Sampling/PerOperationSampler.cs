@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Jaeger4Net.Sampling
 {
-    public class PerOperationSampler : ISampler
+    public sealed class PerOperationSampler : ISampler
     {
         static readonly ILogger<PerOperationSampler> log = Log.Create<PerOperationSampler>();
 
@@ -18,44 +18,43 @@ namespace Jaeger4Net.Sampling
         ProbabilisticSampler probabilisticSampler;
         double lowerBound;
 
+        readonly ISamplerObserver observer;
+
         //exists for testing
         internal IReadOnlyDictionary<string, GuaranteedThroughputSampler> OperationToSamplers => operationSamplers;
 
         public PerOperationSampler(int maxOperations, OperationSamplingParameters operationSamplingParameters,
             IClock clock)
+            : this(maxOperations, operationSamplingParameters, clock, null)
         {
-            this.maxOperations = maxOperations;
-            operationSamplers = new Dictionary<string, GuaranteedThroughputSampler>(maxOperations);
-            probabilisticSampler = new ProbabilisticSampler(operationSamplingParameters.DefaultSamplingProbability);
-            lowerBound = operationSamplingParameters.DefaultLowerBoundTracesPerSecond;
-            this.clock = clock ?? throw new ArgumentNullException(nameof(clock));
-            AddStrategies(operationSamplers, operationSamplingParameters, lowerBound, clock);
+            
         }
 
-        
-        internal PerOperationSampler(int maxOperations, OperationSamplingParameters samplingParameters,
-            ProbabilisticSampler sampler, IClock clock)
+        internal PerOperationSampler(int maxOperations, OperationSamplingParameters operationSamplingParameters,
+            IClock clock, ISamplerObserver observer)
         {
             this.maxOperations = maxOperations;
             operationSamplers = new Dictionary<string, GuaranteedThroughputSampler>(maxOperations);
-            probabilisticSampler = sampler ?? throw new ArgumentNullException(nameof(sampler));
-            lowerBound = samplingParameters.DefaultLowerBoundTracesPerSecond;
+            probabilisticSampler = new ProbabilisticSampler(operationSamplingParameters.DefaultSamplingProbability, observer);
+            lowerBound = operationSamplingParameters.DefaultLowerBoundTracesPerSecond;
             this.clock = clock ?? throw new ArgumentNullException(nameof(clock));
-            AddStrategies(operationSamplers, samplingParameters, lowerBound, clock);
+            AddStrategies(operationSamplers, operationSamplingParameters, lowerBound, clock, observer);
+            this.observer = observer;
         }
 
         public bool Update(OperationSamplingParameters operationSamplingParameters)
         {
             bool updated = false;
-            var pSampler = new ProbabilisticSampler(operationSamplingParameters.DefaultSamplingProbability);
+            var pSampler = new ProbabilisticSampler(operationSamplingParameters.DefaultSamplingProbability, observer);
 
             lock(objLock)
             {
                 lowerBound = operationSamplingParameters.DefaultLowerBoundTracesPerSecond;
-                if(probabilisticSampler.Equals(pSampler))
+                if(!probabilisticSampler.Equals(pSampler))
                 {
                     probabilisticSampler = pSampler;
                     updated = true;
+                    observer?.OnSamplingRateUpdated(pSampler, pSampler.SamplingRate);
                 }
                 foreach(var strategy in operationSamplingParameters.PerOperationStrategies)
                 {
@@ -73,7 +72,8 @@ namespace Jaeger4Net.Sampling
                             sampler = new GuaranteedThroughputSampler(
                                 strategy.ProbabilisticSampling.SamplingRate,
                                 lowerBound,
-                                clock
+                                clock,
+                                observer
                                 );
                             operationSamplers.Add(strategy.Operation, sampler);
                             updated = true;
@@ -96,8 +96,6 @@ namespace Jaeger4Net.Sampling
         public SamplingStatus Sample(string operation, long traceId)
         {
             GuaranteedThroughputSampler sampler = null;
-            bool found = false;
-            int count = 0;
             lock(objLock)
             {
                 if(!operationSamplers.TryGetValue(operation, out sampler) && operationSamplers.Count < maxOperations)
@@ -143,13 +141,13 @@ namespace Jaeger4Net.Sampling
         }
 
         static void AddStrategies(Dictionary<string, GuaranteedThroughputSampler> target,
-            OperationSamplingParameters samplingParameters, double lowerBound, IClock clock)
+            OperationSamplingParameters samplingParameters, double lowerBound, IClock clock, ISamplerObserver observer)
         {
             var toAdd = samplingParameters.PerOperationStrategies.ConvertAll
                 (
                 c => new KeyValuePair<string, GuaranteedThroughputSampler>(
                     c.Operation,
-                    new GuaranteedThroughputSampler(c.ProbabilisticSampling.SamplingRate, lowerBound, clock)
+                    new GuaranteedThroughputSampler(c.ProbabilisticSampling.SamplingRate, lowerBound, clock, observer)
                     )
                 );
             target.AddRange(toAdd);

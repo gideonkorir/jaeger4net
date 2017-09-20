@@ -22,9 +22,15 @@ namespace Jaeger4Net.Sampling
         public List<PerOperationSamplingParameters> PerOperationStrategies { get; set; }
     }
 
-    public class RateLimitingSamplingParameter
+    public struct RateLimitingSamplingParameter
     {
         public double MaxTracesPerSecond { get; set; }
+
+        public static implicit operator RateLimitingSamplingParameter(double value)
+            => new RateLimitingSamplingParameter()
+            {
+                MaxTracesPerSecond = value
+            };
     }
 
     public class PerOperationSamplingParameters
@@ -35,5 +41,11 @@ namespace Jaeger4Net.Sampling
     public class ProbabilisticSamplingParameter
     {
         public double SamplingRate { get; set; }
+
+        public static implicit operator ProbabilisticSamplingParameter(double value)
+            => new ProbabilisticSamplingParameter()
+            {
+                SamplingRate = value
+            };
     }
 }
