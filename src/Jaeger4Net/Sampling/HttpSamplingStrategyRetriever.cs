@@ -27,7 +27,7 @@ namespace Jaeger4Net.Sampling
                     .ConfigureAwait(false);
                 return ParseJson(content);
             }
-            catch(Exception ex)
+            catch(Exception ex) when (!(ex is ParseException))
             {
                 throw new SamplingStrategyRetrieveException("Could not retrieve sampling strategy", ex);
             }
