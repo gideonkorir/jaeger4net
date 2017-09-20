@@ -36,7 +36,7 @@ namespace Jaeger4Net.Tests.Sampling
                 return Task.FromResult(response);
             });
             var retriever = new HttpSamplingStrategyRetriever(new HttpClient(handler), new HostPort("localhost", 987));
-            var resp = await retriever.Get("some service");
+            await retriever.Get("some service");
             Assert.Equal(new Uri("http://localhost:987/?service=some+service"), uri);
         }
 
